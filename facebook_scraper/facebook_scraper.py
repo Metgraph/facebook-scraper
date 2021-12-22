@@ -761,10 +761,7 @@ class FacebookScraper:
             logger.exception("Exception while requesting URL: %s\nException: %r", url, ex)
             raise
 
-    def submit_form(self, response, extra_data={}, login_cookie=None):
-        if login_cookie:
-            # set the cookie necessary to login
-            self.session.cookies.set("datr", login_cookie)
+    def submit_form(self, response, extra_data={}):
         action = response.html.find("form", first=True).attrs.get('action')
         url = utils.urljoin(self.base_url, action)
         elems = response.html.find("input[name][value]")
@@ -781,9 +778,7 @@ class FacebookScraper:
             self.session.cookies.set("datr", cookies_values[0])
 
         response = self.submit_form(
-            response, {"email": email, "pass": password, "_fb_noscript": None},
-            # get the cookie in the page if it is the european facebook page
-            re.search("(?<=\"_js_datr\",\")(.*?)(?=\")", response.html.html).group(0) if response.html.find("#flyout-nocontext-root") is not None else None
+            response, {"email": email, "pass": password, "_fb_noscript": None}
         )
 
         login_error = response.html.find('#login_error', first=True)
